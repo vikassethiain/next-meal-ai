@@ -14,17 +14,19 @@ app = FastAPI()
 
 # --- THE FIX STARTS HERE ---
 # We explicitly allow the frontend to talk to us
+# --- UPDATE THIS SECTION ---
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://next-meal-ai.vercel.app",  # <--- YOUR VERCEL DOMAIN HERE
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,     # Allow these specific websites
+    allow_origins=origins,     # Explicit list instead of ["*"]
     allow_credentials=True,
-    allow_methods=["*"],       # Allow all types (GET, POST, etc.)
-    allow_headers=["*"],       # Allow all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 # --- THE FIX ENDS HERE ---
 
