@@ -43,11 +43,14 @@ def read_root():
     return {"message": "Next Meal AI API is running!"}
 
 # --- USER ENDPOINTS ---
+# --- USERS ---
 @app.post("/users/", response_model=schemas.User)
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    db_user = crud.get_user_by_email(db, email=user.email)
+    # Check if user already exists
+    db_user = crud.get_user(db, user_id=user.id)
     if db_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
+        return db_user
+    # Create new user with the Supabase UUID
     return crud.create_user(db=db, user=user)
 
 # --- MEAL ENDPOINTS ---

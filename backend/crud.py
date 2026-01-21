@@ -2,19 +2,12 @@ from sqlalchemy.orm import Session
 import models, schemas
 
 # --- USER FUNCTIONS ---
-def get_user_by_email(db: Session, email: str):
-    return db.query(models.User).filter(models.User.email == email).first()
+def get_user(db: Session, user_id: str): # CHANGED: int -> str
+    return db.query(models.User).filter(models.User.id == user_id).first()
 
 def create_user(db: Session, user: schemas.UserCreate):
-    # In a real app, we would hash the password here. For now, we store plain text to keep it simple.
-    fake_hashed_password = user.password + "notreallyhashed"
-    db_user = models.User(
-        email=user.email, 
-        hashed_password=fake_hashed_password,
-        full_name=user.full_name,
-        dietary_preferences=user.dietary_preferences,
-        regional_preferences=user.regional_preferences
-    )
+    # We now use the ID passed from the frontend (Supabase UUID)
+    db_user = models.User(id=user.id, email=user.email) 
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
