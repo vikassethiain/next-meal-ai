@@ -1,11 +1,10 @@
-import string
 from pydantic import BaseModel
 from typing import List, Optional
 from datetime import datetime
 
 # --- MEAL SCHEMAS ---
 class MealBase(BaseModel):
-    name: string
+    name: str  # <--- CHANGED from 'string' to 'str'
     category: str
     suitable_time: str
     mood_tag: str
@@ -20,7 +19,7 @@ class MealCreate(MealBase):
 
 class Meal(MealBase):
     id: int
-    owner_id: Optional[str] = None  # CHANGED: int -> str
+    owner_id: Optional[str] = None 
 
     class Config:
         orm_mode = True
@@ -35,7 +34,7 @@ class MealPlanCreate(MealPlanBase):
 
 class MealPlan(MealPlanBase):
     id: int
-    user_id: str  # CHANGED: int -> str
+    user_id: str 
     meal: Meal
 
     class Config:
@@ -46,10 +45,10 @@ class UserBase(BaseModel):
     email: str
 
 class UserCreate(UserBase):
-    id: str # We now require ID to be passed from Supabase (the UUID)
+    id: str 
 
 class User(UserBase):
-    id: str # CHANGED: int -> str
+    id: str 
     is_active: bool
     meal_plans: List[MealPlan] = []
 
