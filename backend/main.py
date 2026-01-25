@@ -73,27 +73,27 @@ def get_my_plan(user_id: int, db: Session = Depends(get_db)):
     return crud.get_user_meal_plans(db=db, user_id=user_id)
 
 # --- AI RECOMMENDATION ENDPOINT ---
-@app.post("/recommend/")
-def recommend_meal(user_id: int, mood: str, time_of_day: str, db: Session = Depends(get_db)):
-    # 1. Fetch the User (to get dietary prefs)
-    user = db.query(models.User).filter(models.User.id == user_id).first()
+# In backend/main.py
+
+@app.post("/recommend/", response_model=schemas.Meal)
+def recommend_meal(
+    user_id: str,  # <--- FIXED: Changed from int to str
+    mood: str,
+    time_of_day: str,
+    db: Session = Depends(get_db)
+):
+    # 1. Check if User exists. If not, auto-create them (Lazy Registration)
+    # This fixes the "Ghost User" problem since we wiped the DB
+    user = crud.get_user(db, user_id=user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-        
-    # 2. Fetch ALL meals (In a real app, we would filter this first to save tokens)
-    # We fetch up to 50 meals to give the AI choices
-    meals = db.query(models.Meal).limit(50).all()
+        # Create a placeholder user so foreign keys don't break
+        # We don't have the email here, but that's okay for now
+        new_user = schemas.UserCreate(id=user_id, email="pending_sync@example.com") 
+        crud.create_user(db=db, user=new_user)
     
-    # Convert DB objects to simple dictionaries so AI can read them
-    meal_list = []
-    for m in meals:
-        meal_list.append({
-            "name": m.name,
-            "category": m.category,
-            "mood": m.mood_tag,
-            "time": m.suitable_time,
-            "ingredients": m.ingredients
-        })
+    # 2. Proceed with AI Recommendation
+    # (Keep your existing AI logic here. I am calling the service function)
+    return ai_service.get_recommendation(mood, time_of_day, user_id, db)
     
     # 3. Construct the Preference String
     # "User is Vegetarian, North Indian. Wants Dinner. Mood is Spicy."
